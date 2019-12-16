@@ -1,0 +1,31 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+header {
+  height: 20vh;
+  border: 2px red solid;
+}
+
+h1 {
+  font-family: "Courgette", cursive;
+  padding: 10px 0;
+  font-size: 2rem;
+  background: linear-gradient(90deg, #03a9f4, #f441a5, #ffeb3b, #03a9f4);
+  background-size: 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+  animation: title-animation 20s linear infinite;
+}
+
+@keyframes title-animation {
+  0% {
+    background-position: 0;
+  }
+  100% {
+    background-position: 400%;
+  }
+}
