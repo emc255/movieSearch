@@ -5,8 +5,9 @@
 }
 
 header {
-  height: 20vh;
-  border: 2px red solid;
+  height: 12vh;
+  margin: auto;
+  text-align: center;
 }
 
 h1 {
@@ -28,4 +29,22 @@ h1 {
   100% {
     background-position: 400%;
   }
+}
+
+.box {
+  text-align: center;
+}
+
+.container-title {
+  margin-top: 25px;
+}
+
+.more-info-btn {
+  margin: auto;
+  display: block;
+  height: 25px;
+  width: 75px;
+  cursor: pointer;
+  font-size: 0.9em;
+  margin-bottom: 5px;
 }

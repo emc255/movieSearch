@@ -6,6 +6,7 @@ document.querySelector(".box").addEventListener("click", moreInfo);
 
 function startSearch() {
   const searchInput = document.querySelector(".search-input").value;
+  document.querySelector(".box").innerHTML = "";
   getData(searchInput);
 }
 
@@ -19,9 +20,9 @@ function getData(search) {
       document.querySelector(".box").insertAdjacentHTML(
         "beforeend",
         `
-         <div class="container_title">
-         <p>Title: ${data.Title}</p>
-         <p>Type: ${data.Type}</p>
+         <div class="container-title">
+         <h3>Title: ${data.Title}</h3>
+         <h4>Type: ${data.Type}</h4>
          <img class="image" src=${data.Poster} alt="">
          <button class="more-info-btn" data-title-id=${data.imdbID}>more info</button>
          </div>
@@ -35,6 +36,12 @@ function getData(search) {
 }
 
 function moreInfo(e) {
+  const reset = document.querySelector(".reset");
+
+  if (reset != null) {
+    reset.outerHTML = "";
+  }
+
   datas.Search.forEach(data => {
     if (e.target.dataset.titleId === data.imdbID) {
       getInfo(e.target.dataset.titleId);
@@ -51,15 +58,19 @@ function getInfo(search) {
     document.querySelector(`[data-title-id=${search}]`).insertAdjacentHTML(
       "afterend",
       ` 
+      <div class="reset">
         <p>Actors: ${infos.Actors}</p>
         <p>Type: ${infos.Plot}</p>
         <p>Metascore: ${infos.Metascore}</p>
-        <p class="ee">Release Year: ${infos.Year}</p>
+        <p class="rating">Release Year: ${infos.Year}</p>
+      </div>
         `
     );
 
+    const rating = document.querySelector(".rating");
+
     for (const rate of infos.Ratings) {
-      document.querySelector(`[data-title-id=${search}]`).insertAdjacentHTML(
+      rating.insertAdjacentHTML(
         "afterend",
         `
         <p>Rating</p>
