@@ -31,6 +31,20 @@ h1 {
   }
 }
 
+.search-input {
+  height: 30px;
+  width: 260px;
+  font-size: 1em;
+  padding-left: 4px;
+}
+
+.search-btn {
+  font-size: 1em;
+  height: 30px;
+  width: 70px;
+  cursor: pointer;
+}
+
 .now-showing {
   display: inline-block;
 }
@@ -43,20 +57,42 @@ h1 {
   margin: 10px auto;
 }
 
-.box {
+.main-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+}
+
+.title-wrapper {
+  margin-top: 25px;
+  width: 400px;
+}
+
+.title-info-wrapper {
   text-align: center;
 }
 
-.container-title {
-  margin-top: 25px;
+h3 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 70px;
 }
 
-.more-info-btn {
+h4 {
+  margin-bottom: 10px;
+}
+
+.additional-info-btn {
   margin: auto;
   display: block;
   height: 25px;
-  width: 75px;
+  width: 150px;
   cursor: pointer;
   font-size: 0.9em;
-  margin-bottom: 5px;
+  margin-top: 5px;
+}
+
+.unshow {
+  display: none;
 }

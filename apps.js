@@ -1,77 +1,101 @@
 //  http://www.omdbapi.com/?i=tt3896198&apikey=8cb964c5 // &page=2 < request the next result
 let datas = [];
 
-document.querySelector(".submit-btn").addEventListener("click", startSearch);
-document.querySelector(".box").addEventListener("click", moreInfo);
-document.querySelector(".previous-btn").addEventListener("click", previousPage);
-document.querySelector(".next-btn").addEventListener("click", nextPage);
+document.querySelector(".search-btn").addEventListener("click", startSearch);
+document.querySelector(".main-wrapper").addEventListener("click", titleMoreInfos);
 
 function startSearch() {
   const searchInput = document.querySelector(".search-input").value;
-  document.querySelector(".box").innerHTML = "";
+  document.querySelector(".main-wrapper").innerHTML = "";
   getData(searchInput);
 }
 
 async function getData(search) {
   const response = await fetch(`http://www.omdbapi.com/?s=${search}&apikey=8cb964c5`);
-  const totalResult = document.querySelector(".total-result");
+
   datas = await response.json();
+  console.log(datas);
 
-  totalResult.textContent = `${datas.totalResults}`;
-
-  datas.Search.forEach(data => {
-    document.querySelector(".box").insertAdjacentHTML(
+  if (datas.Response === "False") {
+    document.querySelector(".main-wrapper").insertAdjacentHTML("beforeend", `<h3>NO MOVIES FOUND</h3>`);
+  } else {
+    document.querySelector(".header-wrapper").insertAdjacentHTML(
       "beforeend",
       `
-         <div class="container-title">
-         <h3>Title: ${data.Title}</h3>
-         <h4>Type: ${data.Type}</h4>
-         <img class="image" src=${data.Poster} alt="">
-         <button class="more-info-btn" data-title-id=${data.imdbID}>more info</button>
+      <div>
+      <button>previous</button>
+      <button>next</button>
+      <div>
+      `
+    );
+
+    const linkTotalResult = Math.floor(datas.totalResults / 10);
+    const linkRemainderTotalResult = datas.totalResults % 10;
+
+    console.log(linkTotalResult);
+    console.log(linkRemainderTotalResult);
+
+    datas.Search.forEach(data => {
+      document.querySelector(".main-wrapper").insertAdjacentHTML(
+        "beforeend",
+        `
+         <div class="title-wrapper">
+          <div class="title-info-wrapper">
+            <h3>${data.Title}</h3>
+            <h4>Type: ${data.Type}</h4>
+            <img class="image" src=${data.Poster} height="450" width="300" alt="">
+            <button class="additional-info-btn" data-title-id=${data.imdbID}>more info</button>
+          </div>
+       
          </div>
         `
-    );
-  });
+      );
+    });
+  }
 }
 
-function moreInfo(e) {
-  const reset = document.querySelector(".reset");
+function titleMoreInfos(e) {
+  const addTitleInfoWrapper = document.querySelector(".add-title-info-wrapper");
 
-  if (reset !== null) {
-    reset.outerHTML = "";
-  }
-
-  datas.Search.forEach(data => {
+  datas.Search.forEach((data, index) => {
     if (e.target.dataset.titleId === data.imdbID) {
-      getInfo(e.target.dataset.titleId);
+      if (e.target.parentNode.parentNode.lastElementChild.classList.contains("show")) {
+        e.target.parentNode.parentNode.lastElementChild.classList.replace("show", "unshow");
+        e.target.textContent = "more info";
+      } else if (e.target.parentNode.parentNode.lastElementChild.classList.contains("unshow")) {
+        e.target.parentNode.parentNode.lastElementChild.classList.replace("unshow", "show");
+        e.target.textContent = "less info";
+      } else {
+        if (addTitleInfoWrapper !== null) {
+          addTitleInfoWrapper.outerHTML = "";
+        }
+        e.target.textContent = "less info";
+        getInfo(e.target.dataset.titleId, index);
+      }
     }
   });
 }
 
-async function getInfo(search) {
-  const response = await fetch(`http://www.omdbapi.com/?i=${search}&apikey=8cb964c5`);
-  infos = await response.json();
+async function getInfo(titleId, index) {
+  let addTitleInfosOutput = "";
+  const response = await fetch(`http://www.omdbapi.com/?i=${titleId}&apikey=8cb964c5`);
+  addTitleInfos = await response.json();
 
-  document.querySelector(`[data-title-id=${search}]`).insertAdjacentHTML(
-    "afterend",
-    ` 
-      <div class="reset">
-        <p>Actors: ${infos.Actors}</p>
-        <p>Type: ${infos.Plot}</p>
-        <p>Metascore: ${infos.Metascore}</p>
-        <p>Release Year: ${infos.Year}</ps>
-        <p class="rating">Rating</p>
-      </div>
-        `
-  );
+  addTitleInfosOutput += `  
+    <p>Actors: ${addTitleInfos.Actors}</p>
+    <p>Type: ${addTitleInfos.Plot}</p>
+    <p>Metascore: ${addTitleInfos.Metascore}</p>
+    <p>Release Year: ${addTitleInfos.Year}</p>
+    <p>Rating</p> 
+    `;
 
-  for (const rate of infos.Ratings) {
-    document.querySelector(".rating").insertAdjacentHTML(
-      "afterend",
-      `
-        <p>Source: ${rate.Source}</p>
-        <p>Value: ${rate.Value}</p>
-        `
-    );
+  for (const rate of addTitleInfos.Ratings) {
+    addTitleInfosOutput += ` 
+      <p>Source: ${rate.Source}</p>
+      <p>Value: ${rate.Value}</p>
+      `;
   }
+  document
+    .querySelectorAll(".title-wrapper")
+    [index].insertAdjacentHTML("beforeend", `<div class="add-title-info-wrapper show">${addTitleInfosOutput}</div>`);
 }
