@@ -7,13 +7,20 @@
     <link rel="stylesheet" href="style.css" />
     <title>Movie Search</title>
   </head>
+
   <body>
     <header>
       <h1>MOVIE SEARCH</h1>
-      <input class="search-input" type="text" placeholder="title here" />
-      <button class="submit-btn">
-        search
-      </button>
+      <div>
+        <input class="search-input" type="text" value="lion" />
+        <button class="submit-btn">search</button>
+      </div>
+      <p class="now-showing">Now Showing</p>
+      <div class="option-btn">
+        <button class="previous-btn">previous</button>
+        <button class="next-btn">next</button>
+      </div>
+      <p class="total-p">Total Result = <span class="total-result">0</span></p>
     </header>
     <main class="box"></main>
     <script src="apps.js"></script>

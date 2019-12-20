@@ -5,7 +5,7 @@
 }
 
 header {
-  height: 12vh;
+  height: 18vh;
   margin: auto;
   text-align: center;
 }
@@ -29,6 +29,18 @@ h1 {
   100% {
     background-position: 400%;
   }
+}
+
+.now-showing {
+  display: inline-block;
+}
+
+.option-btn {
+  margin: 10px auto;
+}
+
+.total-p {
+  margin: 10px auto;
 }
 
 .box {

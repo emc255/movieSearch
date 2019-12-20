@@ -1,8 +1,10 @@
-//  http://www.omdbapi.com/?i=tt3896198&apikey=8cb964c5
+//  http://www.omdbapi.com/?i=tt3896198&apikey=8cb964c5 // &page=2 < request the next result
 let datas = [];
 
 document.querySelector(".submit-btn").addEventListener("click", startSearch);
 document.querySelector(".box").addEventListener("click", moreInfo);
+document.querySelector(".previous-btn").addEventListener("click", previousPage);
+document.querySelector(".next-btn").addEventListener("click", nextPage);
 
 function startSearch() {
   const searchInput = document.querySelector(".search-input").value;
@@ -10,16 +12,17 @@ function startSearch() {
   getData(searchInput);
 }
 
-function getData(search) {
-  const xhttp = new XMLHttpRequest();
+async function getData(search) {
+  const response = await fetch(`http://www.omdbapi.com/?s=${search}&apikey=8cb964c5`);
+  const totalResult = document.querySelector(".total-result");
+  datas = await response.json();
 
-  xhttp.onload = function() {
-    datas = JSON.parse(this.response);
+  totalResult.textContent = `${datas.totalResults}`;
 
-    datas.Search.forEach(data => {
-      document.querySelector(".box").insertAdjacentHTML(
-        "beforeend",
-        `
+  datas.Search.forEach(data => {
+    document.querySelector(".box").insertAdjacentHTML(
+      "beforeend",
+      `
          <div class="container-title">
          <h3>Title: ${data.Title}</h3>
          <h4>Type: ${data.Type}</h4>
@@ -27,18 +30,14 @@ function getData(search) {
          <button class="more-info-btn" data-title-id=${data.imdbID}>more info</button>
          </div>
         `
-      );
-    });
-  };
-
-  xhttp.open("GET", `http://www.omdbapi.com/?s=${search}&apikey=8cb964c5`, true);
-  xhttp.send();
+    );
+  });
 }
 
 function moreInfo(e) {
   const reset = document.querySelector(".reset");
 
-  if (reset != null) {
+  if (reset !== null) {
     reset.outerHTML = "";
   }
 
@@ -49,38 +48,30 @@ function moreInfo(e) {
   });
 }
 
-function getInfo(search) {
-  const xhttp = new XMLHttpRequest();
+async function getInfo(search) {
+  const response = await fetch(`http://www.omdbapi.com/?i=${search}&apikey=8cb964c5`);
+  infos = await response.json();
 
-  xhttp.onload = function() {
-    const infos = JSON.parse(this.response);
-
-    document.querySelector(`[data-title-id=${search}]`).insertAdjacentHTML(
-      "afterend",
-      ` 
+  document.querySelector(`[data-title-id=${search}]`).insertAdjacentHTML(
+    "afterend",
+    ` 
       <div class="reset">
         <p>Actors: ${infos.Actors}</p>
         <p>Type: ${infos.Plot}</p>
         <p>Metascore: ${infos.Metascore}</p>
-        <p class="rating">Release Year: ${infos.Year}</p>
+        <p>Release Year: ${infos.Year}</ps>
+        <p class="rating">Rating</p>
       </div>
         `
-    );
+  );
 
-    const rating = document.querySelector(".rating");
-
-    for (const rate of infos.Ratings) {
-      rating.insertAdjacentHTML(
-        "afterend",
-        `
-        <p>Rating</p>
+  for (const rate of infos.Ratings) {
+    document.querySelector(".rating").insertAdjacentHTML(
+      "afterend",
+      `
         <p>Source: ${rate.Source}</p>
-        <p>Value:${rate.Value}</p>
+        <p>Value: ${rate.Value}</p>
         `
-      );
-    }
-  };
-
-  xhttp.open("GET", `http://www.omdbapi.com/?i=${search}&apikey=8cb964c5`, true);
-  xhttp.send();
+    );
+  }
 }
