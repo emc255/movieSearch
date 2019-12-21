@@ -93,6 +93,13 @@ h4 {
   margin-top: 5px;
 }
 
+.add-title-info-wrapper {
+  margin-top: 10px;
+}
 .unshow {
   display: none;
+}
+
+.choice {
+  cursor: pointer;
 }

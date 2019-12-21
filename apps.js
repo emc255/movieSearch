@@ -1,64 +1,82 @@
 //  http://www.omdbapi.com/?i=tt3896198&apikey=8cb964c5 // &page=2 < request the next result
-let datas = [];
+const mainWrapper = document.querySelector(".main-wrapper");
+const optionBtn = document.querySelector(".option-btn");
+let titleResults = [];
 
 document.querySelector(".search-btn").addEventListener("click", startSearch);
-document.querySelector(".main-wrapper").addEventListener("click", titleMoreInfos);
+mainWrapper.addEventListener("click", titleMoreInfos);
+optionBtn.addEventListener("click", explore);
 
 function startSearch() {
   const searchInput = document.querySelector(".search-input").value;
-  document.querySelector(".main-wrapper").innerHTML = "";
+
+  if (optionBtn !== null) {
+    optionBtn.innerHTML = "";
+  }
+
+  mainWrapper.innerHTML = "";
+
   getData(searchInput);
 }
 
-async function getData(search) {
-  const response = await fetch(`http://www.omdbapi.com/?s=${search}&apikey=8cb964c5`);
+async function explore(e) {
+  const searchInput = document.querySelector(".search-input").value;
 
-  datas = await response.json();
-  console.log(datas);
+  if (e.target.classList.contains("choice")) {
+    console.log(e.target.textContent);
 
-  if (datas.Response === "False") {
-    document.querySelector(".main-wrapper").insertAdjacentHTML("beforeend", `<h3>NO MOVIES FOUND</h3>`);
+    const response = await fetch(
+      `http://www.omdbapi.com/?s=${searchInput}&apikey=8cb964c5&page=${e.target.textContent}`
+    );
+    titleResults = await response.json();
+
+    mainWrapper.innerHTML = "";
+    printTitles(titleResults.Search);
+  }
+}
+
+async function getData(searchTitle) {
+  const response = await fetch(`http://www.omdbapi.com/?s=${searchTitle}&apikey=8cb964c5`);
+
+  titleResults = await response.json();
+
+  if (titleResults.Response === "False") {
+    mainWrapper.insertAdjacentHTML("beforeend", `<h3>NO MOVIES FOUND</h3>`);
   } else {
-    document.querySelector(".header-wrapper").insertAdjacentHTML(
+    optionBtn.insertAdjacentHTML(
       "beforeend",
       `
-      <div>
-      <button>previous</button>
-      <button>next</button>
+      <button class="choice">previous</button>
+      <button class="choice">1</button>
+      <button class="choice">2</button>
+      <button class="choice">3</button>
+      <button class="choice">4</button>
+      <button class="choice">5</button>
+      <button class="choice">6</button>
+      <button class="choice">7</button>
+      <button class="choice">8</button>
+      <button class="choice">9</button>
+      <button class="choice">10</button>
+      <button class="choice">next</button>
       <div>
       `
     );
 
-    const linkTotalResult = Math.floor(datas.totalResults / 10);
-    const linkRemainderTotalResult = datas.totalResults % 10;
+    const linkTotalResult = Math.floor(titleResults.totalResults / 10);
+    const linkRemainderTotalResult = titleResults.totalResults % 10;
 
     console.log(linkTotalResult);
     console.log(linkRemainderTotalResult);
 
-    datas.Search.forEach(data => {
-      document.querySelector(".main-wrapper").insertAdjacentHTML(
-        "beforeend",
-        `
-         <div class="title-wrapper">
-          <div class="title-info-wrapper">
-            <h3>${data.Title}</h3>
-            <h4>Type: ${data.Type}</h4>
-            <img class="image" src=${data.Poster} height="450" width="300" alt="">
-            <button class="additional-info-btn" data-title-id=${data.imdbID}>more info</button>
-          </div>
-       
-         </div>
-        `
-      );
-    });
+    printTitles(titleResults.Search);
   }
 }
 
 function titleMoreInfos(e) {
   const addTitleInfoWrapper = document.querySelector(".add-title-info-wrapper");
 
-  datas.Search.forEach((data, index) => {
-    if (e.target.dataset.titleId === data.imdbID) {
+  titleResults.Search.forEach((title, index) => {
+    if (e.target.dataset.titleId === title.imdbID) {
       if (e.target.parentNode.parentNode.lastElementChild.classList.contains("show")) {
         e.target.parentNode.parentNode.lastElementChild.classList.replace("show", "unshow");
         e.target.textContent = "more info";
@@ -98,4 +116,33 @@ async function getInfo(titleId, index) {
   document
     .querySelectorAll(".title-wrapper")
     [index].insertAdjacentHTML("beforeend", `<div class="add-title-info-wrapper show">${addTitleInfosOutput}</div>`);
+}
+
+function printTitles(titles) {
+  let titleOutput = "";
+
+  titles.forEach(title => {
+    titleOutput += `
+      <div class="title-wrapper">
+      <div class="title-info-wrapper">
+      <h3>${title.Title}</h3>
+      <h4>Type: ${title.Type}</h4>
+      `;
+
+    if (title.Poster === `N/A`) {
+      titleOutput += `
+        <p>NO IMAGE AVAILABLE</p>
+        <button class="additional-info-btn" data-title-id=${title.imdbID}>more info</button>
+        `;
+      document.querySelector(".main-wrapper").insertAdjacentHTML("beforeend", `${titleOutput}`);
+      titleOutput = "";
+    } else {
+      titleOutput += `
+        <img class="image" src=${title.Poster} height="450" width="300" alt=""></img>
+        <button class="additional-info-btn" data-title-id=${title.imdbID}>more info</button>
+        `;
+      document.querySelector(".main-wrapper").insertAdjacentHTML("beforeend", `${titleOutput}`);
+      titleOutput = "";
+    }
+  });
 }
