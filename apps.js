@@ -2,7 +2,9 @@
 const mainWrapper = document.querySelector(".main-wrapper");
 const optionBtn = document.querySelector(".option-btn");
 let titleResults = [];
-
+let pagesOfTitles = [];
+let prevNext = [];
+let prevCounter = 1;
 document.querySelector(".search-btn").addEventListener("click", startSearch);
 mainWrapper.addEventListener("click", titleMoreInfos);
 optionBtn.addEventListener("click", explore);
@@ -13,7 +15,7 @@ function startSearch() {
   if (optionBtn !== null) {
     optionBtn.innerHTML = "";
   }
-
+  prevNext = [];
   mainWrapper.innerHTML = "";
 
   getData(searchInput);
@@ -23,51 +25,43 @@ async function explore(e) {
   const searchInput = document.querySelector(".search-input").value;
 
   if (e.target.classList.contains("choice")) {
-    console.log(e.target.textContent);
+    let currentPage = parseInt(e.target.textContent) - 1;
 
-    const response = await fetch(
-      `http://www.omdbapi.com/?s=${searchInput}&apikey=8cb964c5&page=${e.target.textContent}`
-    );
-    titleResults = await response.json();
-
-    mainWrapper.innerHTML = "";
-    printTitles(titleResults.Search);
+    if (e.target.classList.contains("prev-btn") || (e.target.classList.contains("next-btn") && prevNext.length > 0)) {
+      console.log(prevNext[prevNext.length - 1]);
+      window.history.back();
+      // const response = await fetch(
+      //   `http://www.omdbapi.com/?s=${searchInput}&apikey=8cb964c5&page=${prevNext[prevNext.length - prevCounter++]}`
+      // );
+      // titleResults = await response.json();
+      // mainWrapper.innerHTML = "";
+      // printTitles(titleResults.Search);
+    } else {
+      const response = await fetch(
+        `http://www.omdbapi.com/?s=${searchInput}&apikey=8cb964c5&page=${pagesOfTitles[currentPage]}`
+      );
+      titleResults = await response.json();
+      prevNext.push(currentPage);
+      mainWrapper.innerHTML = "";
+      printTitles(titleResults.Search);
+      prevCounter = 1;
+    }
   }
 }
 
 async function getData(searchTitle) {
   const response = await fetch(`http://www.omdbapi.com/?s=${searchTitle}&apikey=8cb964c5`);
-
   titleResults = await response.json();
+  const linkTotalResult = Math.round(titleResults.totalResults / 10);
+
+  for (let i = 1; i <= linkTotalResult; i++) {
+    pagesOfTitles.push(i);
+  }
 
   if (titleResults.Response === "False") {
     mainWrapper.insertAdjacentHTML("beforeend", `<h3>NO MOVIES FOUND</h3>`);
   } else {
-    optionBtn.insertAdjacentHTML(
-      "beforeend",
-      `
-      <button class="choice">previous</button>
-      <button class="choice">1</button>
-      <button class="choice">2</button>
-      <button class="choice">3</button>
-      <button class="choice">4</button>
-      <button class="choice">5</button>
-      <button class="choice">6</button>
-      <button class="choice">7</button>
-      <button class="choice">8</button>
-      <button class="choice">9</button>
-      <button class="choice">10</button>
-      <button class="choice">next</button>
-      <div>
-      `
-    );
-
-    const linkTotalResult = Math.floor(titleResults.totalResults / 10);
-    const linkRemainderTotalResult = titleResults.totalResults % 10;
-
-    console.log(linkTotalResult);
-    console.log(linkRemainderTotalResult);
-
+    createPages(pagesOfTitles);
     printTitles(titleResults.Search);
   }
 }
@@ -117,7 +111,6 @@ async function getInfo(titleId, index) {
     .querySelectorAll(".title-wrapper")
     [index].insertAdjacentHTML("beforeend", `<div class="add-title-info-wrapper show">${addTitleInfosOutput}</div>`);
 }
-
 function printTitles(titles) {
   let titleOutput = "";
 
@@ -145,4 +138,21 @@ function printTitles(titles) {
       titleOutput = "";
     }
   });
+}
+
+function createPages(number) {
+  let pagesBtn = "";
+  for (let i = 1; i <= number.length; i++) {
+    if (i <= 10) {
+      pagesBtn += ` <button class="choice" data-id=${i}>${i}</button>`;
+    }
+  }
+  optionBtn.insertAdjacentHTML(
+    "beforeend",
+    `
+    <button class="choice prev-btn">previous</button>
+    ${pagesBtn}  
+    <button class="choice next-btn">next</button>
+    `
+  );
 }
