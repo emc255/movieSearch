@@ -2,6 +2,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  background-color: gainsboro;
 }
 
 header {
@@ -36,6 +37,7 @@ h1 {
   width: 260px;
   font-size: 1em;
   padding-left: 4px;
+  border: 2px solid #000000;
 }
 
 .search-btn {
@@ -43,6 +45,7 @@ h1 {
   height: 30px;
   width: 70px;
   cursor: pointer;
+  border: 2px solid #000000;
 }
 
 .now-showing {
@@ -91,6 +94,7 @@ h4 {
   cursor: pointer;
   font-size: 0.9em;
   margin-top: 5px;
+  border: 2px solid #000000;
 }
 
 .add-title-info-wrapper {
@@ -106,17 +110,31 @@ h4 {
   border-radius: 6px;
   width: 30px;
   height: 20px;
+  border: 2px solid #000000;
 }
 
-.choice2 {
+.prev-btn {
   cursor: pointer;
   outline: none;
   border-radius: 6px;
-  width: 60px;
+  width: 65px;
   height: 20px;
+  border: 2px solid #000000;
 }
 
-.choice:hover,
-.choice2:hover {
+.next-btn {
+  cursor: pointer;
+  outline: none;
+  border-radius: 6px;
+  width: 45px;
+  height: 20px;
+  border: 2px solid #000000;
+}
+
+.choice:hover {
   background-color: #147ee0;
+}
+
+.highlight {
+  background-color: #ffeb3b;
 }

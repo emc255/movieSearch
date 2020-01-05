@@ -1,75 +1,57 @@
-//  http://www.omdbapi.com/?i=tt3896198&apikey=8cb964c5 // &page=2 < request the next result
 const mainWrapper = document.querySelector(".main-wrapper");
 const optionBtn = document.querySelector(".option-btn");
-let titleResults = [];
-let pagesOfTitles = [];
-let prevNext = [];
-let prevCounter = 1;
+let titles = [];
+let data = [];
+let collectionOfMovies = {
+  query: titles,
+  page: 1,
+  rows: 10,
+  window: 10,
+};
+
 document.querySelector(".search-btn").addEventListener("click", startSearch);
+document.querySelector(".search-input").addEventListener("keyup", startSearch);
 mainWrapper.addEventListener("click", titleMoreInfos);
 optionBtn.addEventListener("click", explore);
 
-function startSearch() {
-  const searchInput = document.querySelector(".search-input").value;
-
-  if (optionBtn !== null) {
-    optionBtn.innerHTML = "";
-  }
-  prevNext = [];
-  mainWrapper.innerHTML = "";
-
-  getData(searchInput);
-}
-
-async function explore(e) {
-  const searchInput = document.querySelector(".search-input").value;
-
-  if (e.target.classList.contains("choice")) {
-    let currentPage = parseInt(e.target.textContent) - 1;
-
-    if (e.target.classList.contains("prev-btn") || (e.target.classList.contains("next-btn") && prevNext.length > 0)) {
-      console.log(prevNext[prevNext.length - 1]);
-      window.history.back();
-      // const response = await fetch(
-      //   `http://www.omdbapi.com/?s=${searchInput}&apikey=8cb964c5&page=${prevNext[prevNext.length - prevCounter++]}`
-      // );
-      // titleResults = await response.json();
-      // mainWrapper.innerHTML = "";
-      // printTitles(titleResults.Search);
-    } else {
-      const response = await fetch(
-        `http://www.omdbapi.com/?s=${searchInput}&apikey=8cb964c5&page=${pagesOfTitles[currentPage]}`
-      );
-      titleResults = await response.json();
-      prevNext.push(currentPage);
-      mainWrapper.innerHTML = "";
-      printTitles(titleResults.Search);
-      prevCounter = 1;
+function startSearch(e) {
+  if (e.target.classList.contains("search-btn") || e.keyCode === 13) {
+    const searchInput = document.querySelector(".search-input").value;
+    if (optionBtn !== null) {
+      optionBtn.innerHTML = "";
+      collectionOfMovies.page = 1;
     }
+    mainWrapper.innerHTML = "";
+    getData(searchInput);
   }
 }
 
 async function getData(searchTitle) {
-  const response = await fetch(`http://www.omdbapi.com/?s=${searchTitle}&apikey=8cb964c5`);
-  titleResults = await response.json();
-  const linkTotalResult = Math.round(titleResults.totalResults / 10);
+  const response1 = await fetch(`http://www.omdbapi.com/?s=${searchTitle}&apikey=8cb964c5`);
+  titleResults1 = await response1.json();
+  const linkTotalResult = Math.round(titleResults1.totalResults / 10);
 
+  titles = [];
   for (let i = 1; i <= linkTotalResult; i++) {
-    pagesOfTitles.push(i);
+    const response2 = await fetch(`http://www.omdbapi.com/?s=${searchTitle}&apikey=8cb964c5&page=${i}`);
+    titleResults2 = await response2.json();
+    titleResults2.Search.forEach(ele => {
+      titles.push(ele);
+    });
   }
 
-  if (titleResults.Response === "False") {
-    mainWrapper.insertAdjacentHTML("beforeend", `<h3>NO MOVIES FOUND</h3>`);
-  } else {
-    createPages(pagesOfTitles);
-    printTitles(titleResults.Search);
-  }
+  collectionOfMovies.query = titles;
+  data = pagination(collectionOfMovies.query, collectionOfMovies.page, collectionOfMovies.rows);
+
+  printTitles(data);
+  pageBtn(collectionOfMovies.page);
 }
 
 function titleMoreInfos(e) {
   const addTitleInfoWrapper = document.querySelector(".add-title-info-wrapper");
+  data = pagination(collectionOfMovies.query, collectionOfMovies.page, collectionOfMovies.rows);
 
-  titleResults.Search.forEach((title, index) => {
+  data.query.forEach((title, index) => {
     if (e.target.dataset.titleId === title.imdbID) {
       if (e.target.parentNode.parentNode.lastElementChild.classList.contains("show")) {
         e.target.parentNode.parentNode.lastElementChild.classList.replace("show", "unshow");
@@ -88,71 +70,143 @@ function titleMoreInfos(e) {
   });
 }
 
-async function getInfo(titleId, index) {
-  let addTitleInfosOutput = "";
-  const response = await fetch(`http://www.omdbapi.com/?i=${titleId}&apikey=8cb964c5`);
-  addTitleInfos = await response.json();
+function pagination(query, page, rows) {
+  let trimStart = (page - 1) * rows;
+  let trimEnd = trimStart + rows;
+  let trimData = query.slice(trimStart, trimEnd);
+  let pages = Math.ceil(query.length / rows);
 
-  addTitleInfosOutput += `  
-    <p>Actors: ${addTitleInfos.Actors}</p>
-    <p>Type: ${addTitleInfos.Plot}</p>
-    <p>Metascore: ${addTitleInfos.Metascore}</p>
-    <p>Release Year: ${addTitleInfos.Year}</p>
-    <p>Rating</p> 
-    `;
-
-  for (const rate of addTitleInfos.Ratings) {
-    addTitleInfosOutput += ` 
-      <p>Source: ${rate.Source}</p>
-      <p>Value: ${rate.Value}</p>
-      `;
-  }
-  document
-    .querySelectorAll(".title-wrapper")
-    [index].insertAdjacentHTML("beforeend", `<div class="add-title-info-wrapper show">${addTitleInfosOutput}</div>`);
+  return {
+    query: trimData,
+    pages: pages,
+  };
 }
+
 function printTitles(titles) {
   let titleOutput = "";
 
-  titles.forEach(title => {
+  titles.query.forEach(title => {
     titleOutput += `
-      <div class="title-wrapper">
-      <div class="title-info-wrapper">
-      <h3>${title.Title}</h3>
-      <h4>Type: ${title.Type}</h4>
-      `;
+        <div class="title-wrapper">
+        <div class="title-info-wrapper">
+        <h3>${title.Title}</h3>
+        <h4>Type: ${title.Type}</h4>
+        `;
 
     if (title.Poster === `N/A`) {
       titleOutput += `
-        <p>NO IMAGE AVAILABLE</p>
-        <button class="additional-info-btn" data-title-id=${title.imdbID}>more info</button>
-        `;
+          <p>NO IMAGE AVAILABLE</p>
+          <button class="additional-info-btn" data-title-id=${title.imdbID}>more info</button>
+          `;
       document.querySelector(".main-wrapper").insertAdjacentHTML("beforeend", `${titleOutput}`);
       titleOutput = "";
     } else {
       titleOutput += `
-        <img class="image" src=${title.Poster} height="450" width="300" alt=""></img>
-        <button class="additional-info-btn" data-title-id=${title.imdbID}>more info</button>
-        `;
+          <img class="image" src=${title.Poster} height="450" width="300" alt=""></img>
+          <button class="additional-info-btn" data-title-id=${title.imdbID}>more info</button>
+          `;
       document.querySelector(".main-wrapper").insertAdjacentHTML("beforeend", `${titleOutput}`);
       titleOutput = "";
     }
   });
 }
 
-function createPages(number) {
+async function getInfo(titleId, index) {
+  let addTitleInfosOutput = "";
+  const response = await fetch(`http://www.omdbapi.com/?i=${titleId}&apikey=8cb964c5`);
+  addTitleInfos = await response.json();
+
+  addTitleInfosOutput += `  
+      <p>Actors: ${addTitleInfos.Actors}</p>
+      <p>Type: ${addTitleInfos.Plot}</p>
+      <p>Metascore: ${addTitleInfos.Metascore}</p>
+      <p>Release Year: ${addTitleInfos.Year}</p>
+      <p>Rating</p> 
+      `;
+
+  for (const rate of addTitleInfos.Ratings) {
+    addTitleInfosOutput += ` 
+        <p>Source: ${rate.Source}</p>
+        <p>Value: ${rate.Value}</p>
+        `;
+  }
+  document
+    .querySelectorAll(".title-wrapper")
+    [index].insertAdjacentHTML("beforeend", `<div class="add-title-info-wrapper show">${addTitleInfosOutput}</div>`);
+}
+
+function pageBtn(pages) {
   let pagesBtn = "";
-  for (let i = 1; i <= number.length; i++) {
-    if (i <= 10) {
-      pagesBtn += ` <button class="choice" data-id=${i}>${i}</button>`;
+  let maxLeft = pages - Math.floor(collectionOfMovies.window / 2);
+  let maxRight = pages + Math.floor(collectionOfMovies.window / 2);
+
+  if (maxLeft < 1) {
+    maxLeft = 1;
+    maxRight = collectionOfMovies.window + 1;
+  }
+
+  if (maxRight > data.pages) {
+    maxRight = data.pages + 1;
+    maxLeft = maxRight - 10;
+
+    if (maxLeft < 1) {
+      maxLeft = 1;
     }
   }
+  let hid = 0;
+  for (let page = maxLeft; page < maxRight; page++) {
+    pagesBtn += ` <button class="choice choiceNumber" data-hid=${hid++} data-id=${page}>${page}</button>`;
+  }
+
   optionBtn.insertAdjacentHTML(
     "beforeend",
     `
-    <button class="choice prev-btn">previous</button>
-    ${pagesBtn}  
-    <button class="choice next-btn">next</button>
-    `
+      <button class="choice prev-btn">previous</button>
+      ${pagesBtn}  
+      <button class="choice next-btn">next</button>
+      `
   );
+}
+
+function explore(e) {
+  if (e.target.classList.contains("choice")) {
+    mainWrapper.innerHTML = "";
+
+    if (e.target.classList.contains("choiceNumber")) {
+      collectionOfMovies.page = parseInt(e.target.dataset.id);
+    }
+
+    if (e.target.classList.contains("prev-btn")) {
+      collectionOfMovies.page -= 1;
+
+      if (collectionOfMovies.page < 1) {
+        collectionOfMovies.page = 1;
+      }
+    }
+
+    if (e.target.classList.contains("next-btn")) {
+      collectionOfMovies.page += 1;
+
+      if (collectionOfMovies.page >= data.pages) {
+        collectionOfMovies.page = data.pages;
+      }
+    }
+
+    data = pagination(collectionOfMovies.query, collectionOfMovies.page, collectionOfMovies.rows);
+
+    if (optionBtn !== null) {
+      optionBtn.innerHTML = "";
+    }
+
+    printTitles(data);
+    pageBtn(collectionOfMovies.page);
+
+    const opt = document.querySelectorAll(".choiceNumber");
+
+    for (const iterator of opt) {
+      if (parseInt(iterator.textContent) === collectionOfMovies.page) {
+        iterator.classList.add("highlight");
+      }
+    }
+  }
 }
