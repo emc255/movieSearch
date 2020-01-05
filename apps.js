@@ -29,22 +29,27 @@ function startSearch(e) {
 async function getData(searchTitle) {
   const response1 = await fetch(`http://www.omdbapi.com/?s=${searchTitle}&apikey=8cb964c5`);
   titleResults1 = await response1.json();
-  const linkTotalResult = Math.round(titleResults1.totalResults / 10);
 
-  titles = [];
-  for (let i = 1; i <= linkTotalResult; i++) {
-    const response2 = await fetch(`http://www.omdbapi.com/?s=${searchTitle}&apikey=8cb964c5&page=${i}`);
-    titleResults2 = await response2.json();
-    titleResults2.Search.forEach(ele => {
-      titles.push(ele);
-    });
+  if (titleResults1.Response === "True") {
+    const linkTotalResult = Math.round(titleResults1.totalResults / 10);
+    titles = [];
+
+    for (let i = 1; i <= linkTotalResult; i++) {
+      const response2 = await fetch(`http://www.omdbapi.com/?s=${searchTitle}&apikey=8cb964c5&page=${i}`);
+      titleResults2 = await response2.json();
+      titleResults2.Search.forEach(ele => {
+        titles.push(ele);
+      });
+    }
+
+    collectionOfMovies.query = titles;
+    data = pagination(collectionOfMovies.query, collectionOfMovies.page, collectionOfMovies.rows);
+
+    printTitles(data);
+    pageBtn(collectionOfMovies.page);
+  } else {
+    mainWrapper.textContent = "MOVIES NOT FOUND";
   }
-
-  collectionOfMovies.query = titles;
-  data = pagination(collectionOfMovies.query, collectionOfMovies.page, collectionOfMovies.rows);
-
-  printTitles(data);
-  pageBtn(collectionOfMovies.page);
 }
 
 function titleMoreInfos(e) {
