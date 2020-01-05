@@ -153,9 +153,13 @@ function pageBtn(pages) {
       maxLeft = 1;
     }
   }
-  let hid = 0;
+
   for (let page = maxLeft; page < maxRight; page++) {
-    pagesBtn += ` <button class="choice choiceNumber" data-hid=${hid++} data-id=${page}>${page}</button>`;
+    if (page === maxLeft) {
+      pagesBtn += ` <button class="choice choiceNumber highlight" data-id=${page}>${page}</button>`;
+    } else {
+      pagesBtn += ` <button class="choice choiceNumber" data-id=${page}>${page}</button>`;
+    }
   }
 
   optionBtn.insertAdjacentHTML(
@@ -202,6 +206,10 @@ function explore(e) {
     pageBtn(collectionOfMovies.page);
 
     const opt = document.querySelectorAll(".choiceNumber");
+
+    for (const iterator of opt) {
+      iterator.classList.remove("highlight");
+    }
 
     for (const iterator of opt) {
       if (parseInt(iterator.textContent) === collectionOfMovies.page) {
