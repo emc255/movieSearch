@@ -6,7 +6,7 @@ let collectionOfMovies = {
   query: titles,
   page: 1,
   rows: 10,
-  window: 10,
+  window: 10
 };
 
 document.querySelector(".search-btn").addEventListener("click", startSearch);
@@ -83,7 +83,7 @@ function pagination(query, page, rows) {
 
   return {
     query: trimData,
-    pages: pages,
+    pages: pages
   };
 }
 
@@ -144,6 +144,8 @@ function pageBtn(pages) {
   let pagesBtn = "";
   let maxLeft = pages - Math.floor(collectionOfMovies.window / 2);
   let maxRight = pages + Math.floor(collectionOfMovies.window / 2);
+  let first = pages * collectionOfMovies.rows - collectionOfMovies.rows + 1;
+  let last = pages * collectionOfMovies.rows;
 
   if (maxLeft < 1) {
     maxLeft = 1;
@@ -152,11 +154,19 @@ function pageBtn(pages) {
 
   if (maxRight > data.pages) {
     maxRight = data.pages + 1;
-    maxLeft = maxRight - 10;
+    maxLeft = maxRight - collectionOfMovies.window;
 
     if (maxLeft < 1) {
       maxLeft = 1;
     }
+  }
+
+  if (pages === 1) {
+    first = 1;
+  }
+
+  if (pages === data.pages) {
+    last = collectionOfMovies.query.length;
   }
 
   for (let page = maxLeft; page < maxRight; page++) {
@@ -170,10 +180,11 @@ function pageBtn(pages) {
   optionBtn.insertAdjacentHTML(
     "beforeend",
     `
-      <button class="choice prev-btn">previous</button>
-      ${pagesBtn}  
-      <button class="choice next-btn">next</button>
-      `
+    <button class="choice prev-btn">previous</button>
+    ${pagesBtn}  
+    <button class="choice next-btn">next</button>
+    <p class="now-text">Now Showing ${first} - ${last} of ${collectionOfMovies.query.length} </p>
+    `
   );
 }
 

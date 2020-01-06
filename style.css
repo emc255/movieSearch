@@ -45,6 +45,7 @@ h1 {
   height: 30px;
   width: 70px;
   cursor: pointer;
+  outline: none;
   border: 2px solid #000000;
 }
 
@@ -79,7 +80,7 @@ h3 {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 70px;
+  height: 60px;
 }
 
 h4 {
@@ -137,4 +138,8 @@ h4 {
 
 .highlight {
   background-color: #ffeb3b;
+}
+
+.now-text {
+  margin-top: 15px;
 }
